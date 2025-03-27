@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.cameron5237.zendoro"
     },
     "web": {
       "bundler": "metro",
@@ -48,6 +49,7 @@
       "eas": {
         "projectId": "16c7b0ea-40f6-447f-a1a0-466a577c0fcd"
       }
-    }
+    },
+    "owner": "cameron5237"
   }
 }
