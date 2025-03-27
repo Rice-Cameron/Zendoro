@@ -10,14 +10,6 @@ export default function PomodoroScreen() {
   const [isTesting, setIsTesting] = useState(false); // Toggle for testing mode
   const { selectedSound, volume } = useSettings();
 
-  const soundOptions = [
-    { label: 'Chimes', value: 'chimes', source: require('@/assets/sounds/chime.mp3') },
-    { label: 'Rain', value: 'rain', source: require('@/assets/sounds/rain.mp3') },
-    { label: 'Meditation', value: 'meditation', source: require('@/assets/sounds/meditation.mp3') },
-    { label: 'Tibetan Bowl', value: 'tibetan', source: require('@/assets/sounds/tibetan.mp3') },
-  ];
-
-
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;

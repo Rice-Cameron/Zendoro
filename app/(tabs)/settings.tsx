@@ -14,27 +14,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SoundManager from '../utils/SoundManager';
 import { useSettings } from '../context/SettingsContext';
+import { soundOptions, SoundOption } from '@/constants/SoundOptions';
 
-// Type for sound options
-type SoundOption = {
-  label: string;
-  value: string;
-  source: string;
-};
 
 export default function PomodoroSettingsScreen() {
   const insets = useSafeAreaInsets();
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const { selectedSound, setSelectedSound, volume, setVolume, isAlertEnabled, setIsAlertEnabled } = useSettings();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Ref to store the timeout ID
-
-
-  const soundOptions: SoundOption[] = [
-    { label: 'Chimes', value: 'chimes', source: require('@/assets/sounds/chime.mp3') },
-    { label: 'Rain', value: 'rain', source: require('@/assets/sounds/rain.mp3') },
-    { label: 'Meditation', value: 'meditation', source: require('@/assets/sounds/meditation.mp3') },
-    { label: 'Tibetan Bowl', value: 'tibetan', source: require('@/assets/sounds/tibetan.mp3') },  
-  ];
 
   const handleSoundSelect = (sound: SoundOption) => {
     setSelectedSound(sound); // Save the selected sound's value (e.g., "chimes")
