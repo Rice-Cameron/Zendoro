@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, ImageBackground, StyleSheet, Switch } from 'react-native';
-import SoundManager from '@/app/SoundManager'; // Import the SoundManager
+import SoundManager from '@/app/utils/SoundManager'; // Import the SoundManager
 
 export default function PomodoroScreen() {
   const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes in seconds

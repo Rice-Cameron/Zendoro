@@ -12,7 +12,7 @@ import {
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SoundManager from '../SoundManager';
+import SoundManager from '../utils/SoundManager';
 
 // Type for sound options
 type SoundOption = {
@@ -55,6 +55,7 @@ export default function PomodoroSettingsScreen() {
       console.error('Error previewing sound:', error);
     }
   };
+
   const saveSettings = () => {
     // Save selected sound and other settings
     console.log('Settings saved:', { 
@@ -62,16 +63,6 @@ export default function PomodoroSettingsScreen() {
       volume, 
       alertEnabled: isAlertEnabled 
     });
-    
-    // Optional: Play save confirmation sound
-    if (isAlertEnabled) {
-      const selectedSoundOption = soundOptions.find(
-        sound => sound.value === selectedSound
-      );
-      if (selectedSoundOption) {
-        SoundManager.playSound(selectedSoundOption.source, volume);
-      }
-    }
   };
   
   return (
