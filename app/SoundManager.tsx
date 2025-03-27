@@ -19,15 +19,6 @@ class SoundManager {
 
       // Play the sound
       await sound.playAsync();
-
-      // Stop the sound after 10 seconds
-      setTimeout(async () => {
-        if (this.sound) {
-          await this.sound.stopAsync();
-          await this.sound.unloadAsync();
-          this.sound = null;
-        }
-      }, 10000); // 10 seconds in milliseconds
     } catch (error) {
       console.error('Error playing sound:', error);
     }
