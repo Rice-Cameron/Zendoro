@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -26,6 +26,7 @@ export default function PomodoroSettingsScreen() {
   const insets = useSafeAreaInsets();
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const { selectedSound, setSelectedSound, volume, setVolume, isAlertEnabled, setIsAlertEnabled } = useSettings();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Ref to store the timeout ID
 
 
   const soundOptions: SoundOption[] = [
@@ -36,20 +37,28 @@ export default function PomodoroSettingsScreen() {
   ];
 
   const handleSoundSelect = (sound: SoundOption) => {
-    setSelectedSound(sound.value);
-    handleSoundPreview(sound);
+    setSelectedSound(sound); // Save the selected sound's value (e.g., "chimes")
+    handleSoundPreview(sound.source); // Pass the correct source (e.g., require('@/assets/sounds/chime.mp3'))
     setIsDropdownVisible(false);
+    saveSettings(); // Save settings after selection
   };
 
-  const handleSoundPreview = async (soundOption: SoundOption) => {
+  const handleSoundPreview = async (soundSource: any) => {
     try {
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
       // Play the selected sound
-      await SoundManager.playSound(soundOption.source, volume);
-  
-      // Stop the sound after 10 seconds
-      setTimeout(async () => {
+      await SoundManager.playSound(soundSource, volume);
+
+      // Set a new timeout to stop the sound after 3 seconds
+      timeoutRef.current = setTimeout(async () => {
         await SoundManager.stopSound();
-      }, 10000); // 10 seconds in milliseconds
+        timeoutRef.current = null; // Clear the ref after stopping the sound
+      }, 3000); // 3 seconds in milliseconds
     } catch (error) {
       console.error('Error previewing sound:', error);
     }
@@ -58,7 +67,6 @@ export default function PomodoroSettingsScreen() {
   const saveSettings = () => {
     // Save selected sound and other settings
     console.log('Settings saved:', { sound: selectedSound, volume, alertEnabled: isAlertEnabled });
-
   };
   
   return (
@@ -80,7 +88,14 @@ export default function PomodoroSettingsScreen() {
             <Text style={styles.sectionTitle}>Enable Alert Sound</Text>
             <Switch
               value={isAlertEnabled}
-              onValueChange={setIsAlertEnabled}
+              onValueChange={(newValue) => {
+                setIsAlertEnabled(newValue);
+                // Stop the sound instantly if the switch is toggled off
+                if (!newValue) {
+                  SoundManager.stopSound();
+                }
+                saveSettings(); // Save settings on switch change
+              }}
               trackColor={{ 
                 false: '#D2B48C',
                 true: '#5C8C46'
@@ -99,7 +114,7 @@ export default function PomodoroSettingsScreen() {
                 onPress={() => setIsDropdownVisible(true)}
               >
                 <Text style={styles.dropdownText}>
-                  {soundOptions.find(sound => sound.value === selectedSound)?.label || 'Select Sound'}
+                  {soundOptions.find((sound) => sound.value === selectedSound?.value)?.label || 'Select Sound'}
                 </Text>
                 <Ionicons name="chevron-down" size={24} color="#333" />
               </TouchableOpacity>
@@ -123,7 +138,7 @@ export default function PomodoroSettingsScreen() {
                         onPress={() => handleSoundSelect(item)}
                       >
                         <Text style={styles.dropdownItemText}>{item.label}</Text>
-                        {selectedSound === item.value && (
+                        {selectedSound?.value === item.value && (
                           <Ionicons name="checkmark" size={24} color="#5C8C46" />
                         )}
                       </TouchableOpacity>
@@ -149,7 +164,10 @@ export default function PomodoroSettingsScreen() {
                   maximumValue={100}
                   step={1}
                   value={volume}
-                  onValueChange={setVolume}
+                  onValueChange={(newVolume) => {
+                    setVolume(newVolume);
+                    saveSettings(); // Save settings on volume change
+                  }}
                   minimumTrackTintColor="#5C8C46"
                   maximumTrackTintColor="#D2B48C"
                   thumbTintColor="#5C8C46"
@@ -160,13 +178,6 @@ export default function PomodoroSettingsScreen() {
             </View>
           </>
         )}
-
-        <TouchableOpacity 
-          style={styles.saveButton} 
-          onPress={saveSettings}
-        >
-          <Text style={styles.saveButtonText}>Save Settings</Text>
-        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
@@ -203,18 +214,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 10,
     color: '#333',
-  },
-  saveButton: {
-    backgroundColor: '#5C8C46',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   dropdownContainer: {
     flexDirection: 'row',

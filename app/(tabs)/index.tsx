@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, ImageBackground, StyleSheet, Switch } from 'react-native';
-import SoundManager from '@/app/utils/SoundManager'; // Import the SoundManager
-import { useSettings } from '../context/SettingsContext';
+import SoundManager from '@/app/utils/SoundManager';
+import { useSettings } from '@/app/context/SettingsContext';
 
 export default function PomodoroScreen() {
   const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes in seconds
@@ -9,6 +9,13 @@ export default function PomodoroScreen() {
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [isTesting, setIsTesting] = useState(false); // Toggle for testing mode
   const { selectedSound, volume } = useSettings();
+
+  const soundOptions = [
+    { label: 'Chimes', value: 'chimes', source: require('@/assets/sounds/chime.mp3') },
+    { label: 'Rain', value: 'rain', source: require('@/assets/sounds/rain.mp3') },
+    { label: 'Meditation', value: 'meditation', source: require('@/assets/sounds/meditation.mp3') },
+    { label: 'Tibetan Bowl', value: 'tibetan', source: require('@/assets/sounds/tibetan.mp3') },
+  ];
 
 
   const formatTime = (seconds: number) => {
@@ -19,21 +26,26 @@ export default function PomodoroScreen() {
 
   const startTimer = () => {
     if (isRunning) return;
-
+  
+    if (!selectedSound?.source) {
+      console.error('Invalid sound source for selected sound:', selectedSound);
+      return;
+    }
+  
     setIsRunning(true);
     const intervalTimer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(intervalTimer);
           setIsRunning(false);
-
+  
           // Play the saved sound
-          SoundManager.playSound(selectedSound, volume);
-
+          SoundManager.playSound(selectedSound.source, volume);
+  
           // Show the alert and stop the sound when "OK" is pressed
           Alert.alert(
             'Pomodoro Complete!',
-            'Your work session is over.',
+            'Your work session is over, take a break.',
             [
               {
                 text: 'OK',
@@ -43,13 +55,13 @@ export default function PomodoroScreen() {
               },
             ]
           );
-
+  
           return isTesting ? 5 : 25 * 60; // Reset the timer based on mode
         }
         return prev - 1;
       });
     }, 1000);
-
+  
     setTimer(intervalTimer);
   };
 
