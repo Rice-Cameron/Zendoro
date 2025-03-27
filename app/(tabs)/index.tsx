@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, ImageBackground, StyleSheet, Switch } from 'react-native';
 import SoundManager from '@/app/utils/SoundManager'; // Import the SoundManager
+import { useSettings } from '../context/SettingsContext';
 
 export default function PomodoroScreen() {
   const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [isTesting, setIsTesting] = useState(false); // Toggle for testing mode
+  const { selectedSound, volume } = useSettings();
 
-  // Assume these values are fetched from settings
-  const selectedSound = require('@/assets/sounds/chime.mp3'); // Replace with the saved sound from settings
-  const volume = 50; // Replace with the saved volume from settings
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

@@ -13,6 +13,7 @@ import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SoundManager from '../utils/SoundManager';
+import { useSettings } from '../context/SettingsContext';
 
 // Type for sound options
 type SoundOption = {
@@ -23,10 +24,8 @@ type SoundOption = {
 
 export default function PomodoroSettingsScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedSound, setSelectedSound] = useState<string>('bell');
-  const [volume, setVolume] = useState<number>(50);
-  const [isAlertEnabled, setIsAlertEnabled] = useState<boolean>(true);
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
+  const { selectedSound, setSelectedSound, volume, setVolume, isAlertEnabled, setIsAlertEnabled } = useSettings();
 
 
   const soundOptions: SoundOption[] = [
@@ -58,11 +57,8 @@ export default function PomodoroSettingsScreen() {
 
   const saveSettings = () => {
     // Save selected sound and other settings
-    console.log('Settings saved:', { 
-      sound: selectedSound, 
-      volume, 
-      alertEnabled: isAlertEnabled 
-    });
+    console.log('Settings saved:', { sound: selectedSound, volume, alertEnabled: isAlertEnabled });
+
   };
   
   return (
