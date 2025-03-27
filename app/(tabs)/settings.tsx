@@ -12,11 +12,13 @@ import {
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SoundManager from '../SoundManager';
 
 // Type for sound options
 type SoundOption = {
   label: string;
   value: string;
+  source: string;
 };
 
 export default function PomodoroSettingsScreen() {
@@ -26,26 +28,44 @@ export default function PomodoroSettingsScreen() {
   const [isAlertEnabled, setIsAlertEnabled] = useState<boolean>(true);
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
 
+
   const soundOptions: SoundOption[] = [
-    { label: 'Bell', value: 'bell' },
-    { label: 'Chime', value: 'chime' },
-    { label: 'Gentle Alarm', value: 'gentle-alarm' },
-    { label: 'Electronic', value: 'electronic' },
+    { label: 'Chimes', value: 'chimes', source: require('@/assets/sounds/chime.mp3') },
+    { label: 'Rain', value: 'rain', source: require('@/assets/sounds/rain.mp3') },
+    { label: 'Meditation', value: 'meditation', source: require('@/assets/sounds/meditation.mp3') },
+    { label: 'Tibetan Bowl', value: 'tibetan', source: require('@/assets/sounds/tibetan.mp3') },  
   ];
 
+  const handleSoundSelect = (sound: SoundOption) => {
+    setSelectedSound(sound.value);
+    handleSoundPreview(sound); // Play the sound preview
+    setIsDropdownVisible(false);
+  };
+
+  const handleSoundPreview = (soundOption: SoundOption) => {
+    // Preview the sound when selected in dropdown
+    SoundManager.playSound(soundOption.source, volume);
+  };
+
   const saveSettings = () => {
+    // Save selected sound and other settings
     console.log('Settings saved:', { 
       sound: selectedSound, 
       volume, 
       alertEnabled: isAlertEnabled 
     });
+    
+    // Optional: Play save confirmation sound
+    if (isAlertEnabled) {
+      const selectedSoundOption = soundOptions.find(
+        sound => sound.value === selectedSound
+      );
+      if (selectedSoundOption) {
+        SoundManager.playSound(selectedSoundOption.source, volume);
+      }
+    }
   };
-
-  const handleSoundSelect = (sound: SoundOption) => {
-    setSelectedSound(sound.value);
-    setIsDropdownVisible(false);
-  };
-
+  
   return (
     <ImageBackground
       source={require('@/assets/images/zen.jpg')}
