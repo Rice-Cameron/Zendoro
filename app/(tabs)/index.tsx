@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ImageBackground, StyleSheet, Switch } from 'react-native';
+import SoundManager from '@/app/SoundManager'; // Import the SoundManager
 
 export default function PomodoroScreen() {
   const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isTesting, setIsTesting] = useState(false); // Toggle for testing mode
+
+  // Assume these values are fetched from settings
+  const selectedSound = require('@/assets/sounds/chime.mp3'); // Replace with the saved sound from settings
+  const volume = 50; // Replace with the saved volume from settings
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -14,24 +20,37 @@ export default function PomodoroScreen() {
 
   const startTimer = () => {
     if (isRunning) return;
-    
+
     setIsRunning(true);
     const intervalTimer = setInterval(() => {
-      setTimeRemaining(prev => {
+      setTimeRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(intervalTimer);
           setIsRunning(false);
+
+          // Play the saved sound
+          SoundManager.playSound(selectedSound, volume);
+
+          // Show the alert and stop the sound when "OK" is pressed
           Alert.alert(
-            'Pomodoro Complete!', 
-            'Your 25-minute work session is over.',
-            [{ text: 'OK' }]
+            'Pomodoro Complete!',
+            'Your work session is over.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  SoundManager.stopSound(); // Stop the sound when "OK" is pressed
+                },
+              },
+            ]
           );
-          return 25 * 60;
+
+          return isTesting ? 5 : 25 * 60; // Reset the timer based on mode
         }
         return prev - 1;
       });
     }, 1000);
-    
+
     setTimer(intervalTimer);
   };
 
@@ -40,7 +59,7 @@ export default function PomodoroScreen() {
       clearInterval(timer);
     }
     setIsRunning(false);
-    setTimeRemaining(25 * 60);
+    setTimeRemaining(isTesting ? 5 : 25 * 60); // Reset based on mode
   };
 
   useEffect(() => {
@@ -59,22 +78,31 @@ export default function PomodoroScreen() {
     >
       <View style={styles.container}>
         <Text style={styles.timerText}>{formatTime(timeRemaining)}</Text>
-        
+
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, isRunning && styles.disabledButton]} 
+          <TouchableOpacity
+            style={[styles.button, isRunning && styles.disabledButton]}
             onPress={startTimer}
             disabled={isRunning}
           >
             <Text style={styles.buttonText}>Start</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={resetTimer}
-          >
+
+          <TouchableOpacity style={styles.button} onPress={resetTimer}>
             <Text style={styles.buttonText}>Reset</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Toggle for testing mode */}
+        <View style={styles.testingContainer}>
+          <Text style={styles.testingText}>Testing Mode</Text>
+          <Switch
+            value={isTesting}
+            onValueChange={(value) => {
+              setIsTesting(value);
+              setTimeRemaining(value ? 5 : 25 * 60); // Update timer immediately
+            }}
+          />
         </View>
       </View>
     </ImageBackground>
@@ -118,5 +146,16 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  testingContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  testingText: {
+    fontSize: 18,
+    color: '#333',
+    marginRight: 10,
   },
 });
