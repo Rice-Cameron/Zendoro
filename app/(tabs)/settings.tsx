@@ -38,15 +38,23 @@ export default function PomodoroSettingsScreen() {
 
   const handleSoundSelect = (sound: SoundOption) => {
     setSelectedSound(sound.value);
-    handleSoundPreview(sound); // Play the sound preview
+    handleSoundPreview(sound);
     setIsDropdownVisible(false);
   };
 
-  const handleSoundPreview = (soundOption: SoundOption) => {
-    // Preview the sound when selected in dropdown
-    SoundManager.playSound(soundOption.source, volume);
+  const handleSoundPreview = async (soundOption: SoundOption) => {
+    try {
+      // Play the selected sound
+      await SoundManager.playSound(soundOption.source, volume);
+  
+      // Stop the sound after 10 seconds
+      setTimeout(async () => {
+        await SoundManager.stopSound();
+      }, 10000); // 10 seconds in milliseconds
+    } catch (error) {
+      console.error('Error previewing sound:', error);
+    }
   };
-
   const saveSettings = () => {
     // Save selected sound and other settings
     console.log('Settings saved:', { 
